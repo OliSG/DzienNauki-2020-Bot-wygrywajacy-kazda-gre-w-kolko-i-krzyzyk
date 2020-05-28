@@ -1,0 +1,191 @@
+#
+#Za "#" są wpisywane komentarze, nie wpływają na kod, służą do zapisania notatek
+#W tym wypadku opisują konkretne fragmenty kodu
+#
+
+import time
+import os
+board = [' ' for x in range(10)] #przypisuje tablicy wartości od 0 do 9
+
+def insertLetter(letter, pos): #definiuje wpisywanie znaków
+    board[pos] = letter        #oznacza konkretne pole jako zapełnione
+
+def spaceIsFree(pos):          #sprawdza, które miejsca jeszcze są puste
+    return board[pos] == ' '
+
+def clear():                    #Funkcja odpowiedzialna za czyszczenie całego ekranu
+    os.system('cls' if os.name=='nt' else 'clear')
+
+def printBoard0(board0):                                        #plansza pokazująca ustawienie cyfr do wpisywania     
+    print(' ' + '1' + ' | ' + '2' + ' | ' + '3')
+    print('-----------')
+    print(' ' + '4' + ' | ' + '5' + ' | ' + '6')
+    print('-----------')
+    print(' ' + '7' + ' | ' + '8' + ' | ' + '9')
+
+
+def printBoard(board):                                            #Plansza gry
+    print(' ' + board[1] + ' | ' + board[2] + ' | ' + board[3])
+    print('-----------')
+    print(' ' + board[4] + ' | ' + board[5] + ' | ' + board[6])
+    print('-----------')
+    print(' ' + board[7] + ' | ' + board[8] + ' | ' + board[9])
+
+def printBoard2(board2):                                           #Plansza z oszustwami                                           
+    print(' ' + 'O' + ' | ' + 'O' + ' | ' + 'O')
+    print('-----------')
+    print(' ' + ' ' + ' | ' + ' ' + ' | ' + ' ')
+    print('-----------')
+    print(' ' + ' ' + ' | ' + ' ' + ' | ' + ' ')
+    
+def isWinner(bo, le):
+    return (bo[7] == le and bo[8] == le and bo[9] == le) or (bo[4] == le and bo[5] == le and bo[6] == le) or(bo[1] == le and bo[2] == le and bo[3] == le) or(bo[1] == le and bo[4] == le and bo[7] == le) or(bo[2] == le and bo[5] == le and bo[8] == le) or(bo[3] == le and bo[6] == le and bo[9] == le) or(bo[1] == le and bo[5] == le and bo[9] == le) or(bo[3] == le and bo[5] == le and bo[7] == le)
+    #Ta długaśna linijka powyżej definiuje warunki zwycięstwa. Sprawdza pionowo, poziomo i na skosy.
+    #"bo" oznacza board, w [] napisany jest numerek pola zdefiniowany w printBoard, "le" oznacza letter, w tym wypadku symbol, nie rozróżnia X i O.
+
+def playerMove(): #definiuje ruch gracza
+    run = True    #oznacza, że gra jest w trakcie
+    while run:
+        print('-----------------------------------')
+        move = input('Proszę wybrać miejsce do postawienia "X" (1-9): ') #Cały ten fragment kodu sprawdza czy gracz dobrze zrobił ruch
+        print('-----------------------------------')
+        try:
+            move = int(move)
+            if move > 0 and move < 10:                                  #W tym miejscu sprawdzane jest czy wpisana przez gracza liczba
+                if spaceIsFree(move):                                   #należy do przedziału od 1 do 9
+                    run = False
+                    insertLetter('X', move)                             #Jeśli tak, ruch jest wykonywany
+                else:                                                   #Jeśli ruch znajduje się w przedziale 1-9, ale miejsce wybrane przez
+                    print('-----------------------------------')        #gracza jest zajęte, wyświetla się wiadomość, że miejsce jest zajęte
+                    print('To miejsce jest zajęte!')
+                    print('-----------------------------------')
+            else:                                                       #jeżeli wybrane miejsce nie należy do przedziału 1-9 wyświetla się           
+                print('Prosze wpisać numer z  przedziału 1-9!')         #wiadomość, że należy wybrać miejsce z przedziału 1-9
+                
+        except:                                                         #Jeśli wpisana informacja nie jest liczbą całkowitą pojawia się wiadomość,
+            print('Proszę wpisać numer!')                               #że należy wpisać numer
+            
+         
+def cheat():
+    board2 = [' ' for x in range(10)]                   #tu jest cały cheat
+    print('-----------------------------------')        #po prostu generuje tablice w, której wszystko jest puste poza pierwszym rzędem, który zajmuje kółko
+    printBoard2(board2)
+    time.sleep(1)
+    print('Komputer wygrywa, spróbuj ponownie!')
+    time.sleep(1)
+
+def demo():                                             #W tym miejscu definiowane jest wyświetlanie się tablicy pokazowej razem z 
+    board0 = [' ' for x in range(10)]                   #objaśnieniami zasad rozgrywki
+    print('-----------------------------------')
+    printBoard0(board0)
+    print('-----------------------------------')
+    time.sleep(1)
+    print('Każdą pozycję oznacza jedna z podanych cyfr, wybierz cyfrę od 1 do 9')
+    print('w miejsce wybranej cyfry pojawi się "X"')
+    time.sleep(2)
+
+
+def compMove(): #definiuje ruch komputera
+    possibleMoves = [x for x, letter in enumerate(board) if letter == ' ' and x != 0]
+    move = 0
+
+    for let in ['O', 'X']:                  #w pierwszej kolejności komputer sprawdza, czy ma ruch, który zapewni mu wygraną lub
+        for i in possibleMoves:             #czy gracz w następnym ruchu może wygrać, jeśli tak to go blokuje
+            boardCopy = board[:]
+            boardCopy[i] = let
+            if isWinner(boardCopy, let):
+                move = i
+                return move
+
+    cornersOpen = []                        #sprawdza, które rogi są wolne
+    for i in possibleMoves:
+        if i in [1,3,7,9]:
+            cornersOpen.append(i)           #zapamiętuje to
+            
+    if len(cornersOpen) > 0:                #wypełnia jeden z wolnych rogów znakiem (losowo), jeśli rogi nie są wolne to
+        move = selectRandom(cornersOpen)    #sprawdza następny przypadek, w tym wypadku jest to środek planszy
+        return move
+
+    if 5 in possibleMoves:                  #sprawdza czy środek jest wolny, jeśli tak to go wypełnia, jeśli środek nie jest wolny to
+        move = 5                            #sprawdza następny przypadek, w tym wypadku są to boki planszy
+        return move
+
+    edgesOpen = []
+    for i in possibleMoves:                 #sprawdza czy boki są wolne
+        if i in [2,4,6,8]:
+            edgesOpen.append(i)             #zapamiętuje to
+            
+    if len(edgesOpen) > 0:
+        move = selectRandom(edgesOpen)      #wypełnia jeden z wolnych boków znakiem "O" (losowo)
+        
+    return move #swój wybór zwraca do zmiennej "move", która potem jest wypisywana
+
+def selectRandom(li): #definiuje losowość 
+    import random
+    ln = len(li)
+    r = random.randrange(0,ln)
+    return li[r]
+    
+
+def isBoardFull(board):      #sprawdza czy wszystkie pola są zajęte
+    if board.count(' ') > 1: #sprawdza czy liczba wolnych miejsc >= 1, jeśli tak zwraca wartość "False", czyli mówi, że plansza nie jest pełna
+        return False
+    else:
+        return True          #w każdym innym przypadku zwraca wartoś "True", czyli mówi, że plansza jest pełna
+
+def main(): #funkcja główna, tu się dzieje cała gra
+    printBoard(board)
+
+    while not(isBoardFull(board)):                                              #Działa tak długo, aż tablica nie zostanie wypełniona znakami
+        if not(isWinner(board, 'O')):                                           #Sprawdza czy warunki opisane w isWinner są spełnione przez O
+            playerMove()                                                        #jeśli nie to gracz może zrobić ruch
+            printBoard(board)
+        else:                                                                   #w innych wypadkach, komputer wygrywa
+            print('Komputer wygrywa, spróbuj ponownie!')
+            break
+
+        if not(isWinner(board, 'X')):                                  #sprawdza czy warunki opisane w isWinner są spełnione przez X
+            move = compMove()
+            if move == 0:                                              #jeśli nie są i komputer nie może zrobić ruchu, to uruchamiana jest funkcja cheat()
+                time.sleep(1)
+                print('-----------------------------------')
+                print('Hmm')
+                time.sleep(3)
+                clear()
+                time.sleep(1)
+                cheat()
+            else:
+                time.sleep(1)                                          
+                insertLetter('O', move)
+                clear()
+                print('-----------------------------------')
+                print('Komputer postawił "O" w polu nr: ', move , ':')
+                print('-----------------------------------')
+                printBoard(board)                                              
+        else:                       #przypadek, kiedy gracz wygrywa kończy się odpaleniem cheatu
+            time.sleep(1)
+            print('-----------------------------------')
+            print('Hmm')
+            time.sleep(3)
+            clear()
+            time.sleep(1)
+            cheat()                                     
+            break
+
+while True:                                              #Ta pętla włącza rozgrywkę
+    print('-----------------------------------')
+    print('Witaj! Spróbuj pokonać komputer, który zawsze wygrywa w kółko i krzyżyk!')       
+    answer = input('Zagramy? (Y/N)')
+    if answer.lower() == 'y' or answer.lower == 'yes':  #Odpowiedzi "y" i "Y" pozwalają na wygenerowanie się planszy
+        demo()                                          #i rozpoczęcie gry
+        board = [' ' for x in range(10)]
+        print('-----------------------------------')
+        main()
+    else:                                               #Jakakolwiek inna odpowiedź sprawi, że program się wyłączy     
+        print('Może następnym razem uda Ci się mnie pokonać ;)')
+        time.sleep(3)
+        break
+        
+        #
+        #Ten kod jest tylko algorytmem gry w kółko i krzyżyk z komputerem, z którym nie da się wygrać, ponieważ komputer oszukuje.
+        #
