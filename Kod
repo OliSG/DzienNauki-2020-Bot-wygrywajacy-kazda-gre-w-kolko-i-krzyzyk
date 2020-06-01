@@ -70,7 +70,7 @@ def cheat():
     board2 = [' ' for x in range(10)]                   #tu jest cały cheat
     print('-----------------------------------')        #po prostu generuje tablice w, której wszystko jest puste poza pierwszym rzędem, który zajmuje kółko
     printBoard2(board2)
-    time.sleep(1)
+    time.sleep(1)                                       #Wstrzymuje działanie programu na pewien okres czsu podany w sekundach
     print('Komputer wygrywa, spróbuj ponownie!')
     time.sleep(1)
 
@@ -151,8 +151,8 @@ def main(): #funkcja główna, tu się dzieje cała gra
                 print('-----------------------------------')
                 print('Hmm')
                 time.sleep(3)
-                clear()
-                time.sleep(1)
+                clear()                                                #Podanie nazwy funkcji po prostu ją wywołuje, w tym momencie wykonywane
+                time.sleep(1)                                          #zostają instrukcje zawarte w funkcji clear()
                 cheat()
             else:
                 time.sleep(1)                                          
